@@ -7,7 +7,7 @@ router.post("/signUp", userController.SIGN_UP);
 
 router.post("/login", userController.LOGIN);
 
-// router.get("/getNewJwtToken", auth, userController.GET_NEW_JWT);
+router.get("/getNewJwtToken", userController.GET_NEW_JWT);
 
 router.get("/getAllUsers", auth, userController.GET_ALL_USERS);
 

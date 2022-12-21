@@ -1,5 +1,5 @@
-// const bcrypt = require("bcryptjs");
-// const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { response } = require("express");
 const auth = require("../middlewares/auth");
 const TicketSchema = require("../models/ticketModel");
@@ -24,19 +24,11 @@ module.exports.CREATE_TICKET = (req, res) => {
 module.exports.BUY_TICKET = async (req, res) => {
   const ticket = await TicketSchema.findOne({ _id: req.params.id })
     .then((result) => {
-      console.log(result._id);
-      return result._id;
+      console.log(result);
+      return result;
     })
-    .then((ticketId) => {
-      return ticketId;
-    });
-  const ticketPrice = await TicketSchema.findOne({ _id: req.params.id })
-    .then((result) => {
-      console.log(result.ticketPrice);
-      return result.ticketPrice;
-    })
-    .then((price) => {
-      return price;
+    .then((ticket) => {
+      return ticket;
     });
   const fund = await UserSchema.findOne({ _id: req.body.id })
     .then((result) => {
@@ -46,16 +38,16 @@ module.exports.BUY_TICKET = async (req, res) => {
     .then((moneyBalance) => {
       return moneyBalance;
     });
-  const balanceAfterPurchase = fund - ticketPrice;
-  console.log(ticketPrice);
+  const balanceAfterPurchase = fund - ticket.ticketPrice;
+  console.log(ticket.ticketPrice);
   console.log(fund);
-  console.log(ticketPrice < fund);
-  if (ticketPrice < fund) {
+  console.log(ticket.ticketPrice < fund);
+  if (ticket.ticketPrice < fund) {
     UserSchema.updateOne(
       { _id: req.body.id },
       {
         moneyBalance: balanceAfterPurchase,
-        $push: { ticketsBought: ticket },
+        $push: { ticketsBought: ticket._id },
       }
     )
       .exec()

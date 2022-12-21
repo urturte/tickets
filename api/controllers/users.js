@@ -94,50 +94,41 @@ module.exports.LOGIN = async (req, res) => {
   }
 };
 
-// module.exports.GET_NEW_JWT = async function (req, res) {
-//   try {
-//     const user = await UserSchema.findOne({ email: req.body.email });
+module.exports.GET_NEW_JWT = (req, res) => {
+  const refreshToken = req.headers.authorization;
+  console.log(refreshToken);
+  jwt.verify(refreshToken, process.env.JWT_SECRET, (err, decoded) => {
+    if (!err) {
+      const token = jwt.sign(
+        {
+          email: decoded.email,
+          userId: decoded._id,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" },
+        { algorythm: "RS256" }
+      );
+      const refreshToken = jwt.sign(
+        {
+          email: decoded.email,
+          userId: decoded._id,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "24h" },
+        { algorythm: "RS256" }
+      );
 
-//     const isPasswordMatch = await bcrypt.compare(
-//       req.body.password,
-//       user.password
-//     );
-
-//     console.log(user);
-
-//     if (isPasswordMatch) {
-//       const token = jwt.sign(
-//         {
-//           email: user.email,
-//           userId: user._id,
-//         },
-//         process.env.JWT_SECRET,
-//         { expiresIn: "1h" },
-//         { algorythm: "RS256" }
-//       );
-//       const refreshToken = jwt.sign(
-//         {
-//           email: user.email,
-//           userId: user._id,
-//         },
-//         process.env.JWT_SECRET,
-//         { expiresIn: "24h" },
-//         { algorythm: "RS256" }
-//       );
-
-//       return res.status(200).json({
-//         status: "login successfull",
-//         jwt_token: token,
-//         jwt_refresh_token: refreshToken,
-//       });
-//     }
-//   } catch (err) {
-//     console.log("err", err);
-//     return res.status(401).json({
-//       status: "Login failed. Please enter valid email and/or password.",
-//     });
-//   }
-// };
+      return res.status(200).json({
+        status: "login successfull",
+        jwt_token: token,
+        jwt_refresh_token: refreshToken,
+      });
+    } else {
+      console.log(err, "Authorization failed");
+      return res.status(401).json({ error: "Authorization failed" });
+    }
+  });
+};
 
 module.exports.GET_ALL_USERS = async function (req, res) {
   const data = await UserSchema.find().sort(" name");
